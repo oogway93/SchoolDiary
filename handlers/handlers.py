@@ -1,3 +1,4 @@
+import aiosqlite
 from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.types import Message
@@ -5,7 +6,8 @@ from aiogram import Bot
 from aiogram.utils.markdown import hbold
 
 from keyboards import reply
-from database.utils import insert_user_id
+from database.utils import insert_user_sql
+from handlers import tasks
 
 router = Router()
 
@@ -33,8 +35,21 @@ async def cmd_start(message: Message):
                          )
     user_id = message.from_user.id
     username = message.from_user.username
-    await insert_user_id(user_id, username)
+    await insert_user_sql(user_id, username)
 
 
-async def noon_print():
-    print('sadijaduhsadsa')
+# async def noon_print(bot: Bot):
+#     async with aiosqlite.connect('schoolDiary.db') as db:
+#         async with db.execute("""SELECT user_id FROM users;""") as cursor:
+#             async for users in cursor:
+#                 for user in list(users):
+#                     await bot.send_message(user, text='lalala')
+
+# async def noon_print(bot: Bot):
+#     user_id_list = await get_users_sql()
+#     async for user in user_id_list:
+#         await bot.send_message(user, text='lalala')
+
+async def send_notifications_handler(bot: Bot):
+    message = 'Привет. Твое расписание на завтра...'
+    await tasks.send_notifications_task(bot, message)

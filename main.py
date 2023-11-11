@@ -7,10 +7,9 @@ from aiogram.types import Message
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config import API_TOKEN
-from handlers.handlers import router, noon_print
+from handlers.handlers import router, send_notifications_handler
 from database import connection
 
-# from handlers.tasks import scheduler
 
 bot = Bot(API_TOKEN, parse_mode='HTML')
 
@@ -22,7 +21,7 @@ def on_startup() -> str:
 
 
 scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
-scheduler.add_job(noon_print, 'cron', day_of_week='mon-sat', hour=23, minute=16)
+scheduler.add_job(send_notifications_handler, 'cron', day_of_week='mon-sat', hour=17, minute=59, kwargs={'bot': bot})
 
 
 # scheduler.add_job(noon_print, 'interval', seconds=5)

@@ -5,8 +5,10 @@ from aiogram import Bot
 from aiogram.utils.markdown import hbold
 
 from keyboards import reply
+from database.utils import insert_user_id
 
 router = Router()
+
 
 # sending = False
 
@@ -30,6 +32,8 @@ async def cmd_start(message: Message):
                          'Доступные команды: /расписание'
                          )
     user_id = message.from_user.id
+    username = message.from_user.username
+    await insert_user_id(user_id, username)
 
 
 async def noon_print():

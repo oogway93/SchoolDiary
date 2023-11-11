@@ -8,6 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config import API_TOKEN
 from handlers.handlers import router, noon_print
+from database import connection
 
 # from handlers.tasks import scheduler
 
@@ -22,12 +23,15 @@ def on_startup() -> str:
 
 scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
 scheduler.add_job(noon_print, 'cron', day_of_week='mon-sat', hour=23, minute=16)
+
+
 # scheduler.add_job(noon_print, 'interval', seconds=5)
 
 
 async def main():
-    scheduler.start()
     dp.include_router(router)
+    scheduler.start()
+    await connection.create_db()
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, on_startup=on_startup)
 

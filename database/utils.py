@@ -1,3 +1,5 @@
+import logging
+
 import aiosqlite
 from aiosqlite import IntegrityError
 
@@ -12,4 +14,4 @@ async def insert_user_sql(user_id: int, username: str) -> None:
                     await cursor.execute("""INSERT INTO users(user_id, username) VALUES(?, ?);""", (user_id, username))
                     await db.commit()
             except IntegrityError:
-                raise IntegrityError('Этот пользователь уже записан в базу данных')
+                logging.info('!!!ЭТОТ ПОЛЬЗОВАТЕЛЬ УЖЕ ЗАПИСАН В БАЗУ ДАННЫХ!!!')

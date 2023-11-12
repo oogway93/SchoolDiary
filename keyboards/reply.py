@@ -1,4 +1,4 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
 tf_btns = ReplyKeyboardMarkup(
     keyboard=[
@@ -9,5 +9,6 @@ tf_btns = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True,
     input_field_placeholder="Да/Нет",
-    selective=True
+    selective=True,
+    one_time_keyboard=True
 )

@@ -1,6 +1,4 @@
 import aiosqlite
-from aiogram import Bot
-from aiogram.types import Message
 from aiosqlite import IntegrityError
 
 
@@ -15,11 +13,3 @@ async def insert_user_sql(user_id: int, username: str) -> None:
                     await db.commit()
             except IntegrityError:
                 raise IntegrityError('Этот пользователь уже записан в базу данных')
-
-
-async def send_notifications_task(bot: Bot, message: str) -> Message:
-    async with aiosqlite.connect('schoolDiary.db') as db:
-        async with db.execute("""SELECT user_id FROM users;""") as cursor:
-            async for users in cursor:
-                for user in list(users):
-                    await bot.send_message(user, text=f'{message}', parse_mode='HTML')

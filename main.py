@@ -44,7 +44,6 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, on_startup=on_startup)
 
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, stream=sys.stdout,
                         format="%(name)s : %(asctime)s : %(levelname)s : %(message)s")

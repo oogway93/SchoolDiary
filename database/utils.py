@@ -15,3 +15,5 @@ async def insert_user_sql(user_id: int, username: str) -> None:
                     await db.commit()
             except IntegrityError:
                 logging.info('!!!ЭТОТ ПОЛЬЗОВАТЕЛЬ УЖЕ ЗАПИСАН В БАЗУ ДАННЫХ!!!')
+
+

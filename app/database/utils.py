@@ -1,7 +1,10 @@
 import logging
 
+from aiogram.types import Message
 import aiosqlite
 from aiosqlite import IntegrityError
+from pymongo import MongoClient
+from config import MONGO_url
 
 
 async def insert_user_sql(user_id: int, username: str) -> None:
@@ -17,3 +20,10 @@ async def insert_user_sql(user_id: int, username: str) -> None:
                 logging.info('!!!ЭТОТ ПОЛЬЗОВАТЕЛЬ УЖЕ ЗАПИСАН В БАЗУ ДАННЫХ!!!')
 
 
+cluster = MongoClient(MONGO_url)
+db = cluster['ScheduleDB']
+collection = db['Schedule']
+
+
+def update_schedule(class_name: str, day: str, new_schedule: str):
+    collection.update_one({"class_name": class_name}, {"$set": {f"schedule.{day}": new_schedule.split()}})

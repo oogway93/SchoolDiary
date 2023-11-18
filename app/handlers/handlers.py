@@ -14,6 +14,7 @@ from app.database import utils
 
 router = Router()
 
+
 answers1 = ["Да", "Нет"]
 answers2 = ["Да", "Нет"]
 
@@ -159,6 +160,21 @@ async def class_chosen_handler(message: Message, state: FSMContext):
     await state.set_state(Schedule.choosing_day)
 
 
+@router.message(Command(commands=["cancel"]))
+@router.message(F.text.lower() == "отмена")
+async def cancel_handler(message: Message, state: FSMContext):
+    """
+    Хэндлер, реализующий отмену действий.
+    :param message: Message
+    :param state: FSMContext
+    """
+    await state.clear()
+    await message.answer(
+        text="Действие отменено",
+        reply_markup=kb.main
+    )
+
+
 @router.message(Schedule.choosing_class)
 async def class_chosen_incorrectly_handler(message: Message):
     """
@@ -192,7 +208,7 @@ async def day_chosen_handler(message: Message, state: FSMContext):
     for subject in get_schedule:
         counter += 1
         result += str(counter) + ') '
-        result += subject.title() + '\n'
+        result += subject.capitalize() + '\n'
 
     await message.answer(
         text=f'Ваше на расписание на {message.text}: \n\n{result}',
@@ -200,21 +216,6 @@ async def day_chosen_handler(message: Message, state: FSMContext):
     )
 
     await state.clear()
-
-
-@router.message(Command(commands=["cancel"]))
-@router.message(F.text.lower() == "отмена")
-async def cancel_handler(message: Message, state: FSMContext):
-    """
-    Хэндлер, реализующий отмену действий.
-    :param message: Message
-    :param state: FSMContext
-    """
-    await state.clear()
-    await message.answer(
-        text="Действие отменено",
-        reply_markup=kb.main
-    )
 
 
 @router.message(Schedule.choosing_day)

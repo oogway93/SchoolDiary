@@ -25,4 +25,4 @@ collection = db['Schedule']
 
 
 def update_schedule(class_name: str, day: str, new_schedule: str):
-    collection.update_one({"class_name": class_name}, {"$set": {f"schedule.{day}": new_schedule.split()}})
+    collection.update_one({"class_name": class_name}, {"$set": {f"schedule.{day}": new_schedule.split('\n')}})

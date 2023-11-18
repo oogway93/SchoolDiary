@@ -5,6 +5,9 @@ tf_btns = ReplyKeyboardMarkup(
         [
             KeyboardButton(text='Да'),
             KeyboardButton(text='Нет')
+        ],
+        [
+            KeyboardButton(text='Отмена')
         ]
     ],
     resize_keyboard=True,
@@ -40,6 +43,9 @@ admin_panel = ReplyKeyboardMarkup(
 
         [
             KeyboardButton(text='Сделать объявление')
+        ],
+        [
+            KeyboardButton(text='Отмена')
         ]
     ],
     resize_keyboard=True,

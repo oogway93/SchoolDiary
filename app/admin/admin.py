@@ -133,8 +133,8 @@ async def admin_day_chosen_handler(message: Message, state: FSMContext):
     """
     await state.update_data(chosen_day=message.text.lower())
     await message.answer(
-        text=f'Введите новое расписание: \n\n{hbold("Каждый новый предмет вводите после пробела")}.\n{hbold("Учтите, что порядок предметов очень важен.")}\n\n{hbold("Пример ввода: информатика алгебра биология")}',
-        reply_markup=kb.cancel
+        text=f'Введите новое расписание: \n\n{hbold("Каждый новый предмет вводите с новой строки")}.\n{hbold("Учтите, что порядок предметов очень важен.")}\n\n{hbold("Пример ввода:")} \nинформатика\nбиология\nалгебра',
+        reply_markup=kb.cancel,
     )
 
     await state.set_state(ScheduleAdmin.admin_changing_schedule)

@@ -1,6 +1,8 @@
 import aiosqlite
 from aiogram import Bot
 from aiogram.types import Message
+from aiogram.exceptions import TelegramForbiddenError
+from app.keyboards import reply as kb
 
 
 async def send_notifications_task(bot: Bot, message: str) -> Message:
@@ -13,4 +15,7 @@ async def send_notifications_task(bot: Bot, message: str) -> Message:
         async with db.execute("""SELECT user_id FROM users;""") as cursor:
             async for users in cursor:
                 for user in list(users):
-                    await bot.send_message(user, text=f'{message}', parse_mode='HTML')
+                    try:
+                        await bot.send_message(user, text=f'{message}', parse_mode='HTML')
+                    except TelegramForbiddenError:
+                        pass

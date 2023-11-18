@@ -1,6 +1,5 @@
 import logging
 
-from aiogram.types import Message
 import aiosqlite
 from aiosqlite import IntegrityError
 from pymongo import MongoClient

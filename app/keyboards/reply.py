@@ -17,6 +17,10 @@ main = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text='Расписание'),
+        ],
+
+        [
+            KeyboardButton(text='Уведомления'),
             KeyboardButton(text='Контакты')
         ],
 
@@ -25,9 +29,7 @@ main = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
-    # input_field_placeholder="Да/Нет",
-    selective=True,
-    # one_time_keyboard=True
+    input_field_placeholder="Выберите действие",
 )
 
 admin_panel = ReplyKeyboardMarkup(
@@ -36,11 +38,12 @@ admin_panel = ReplyKeyboardMarkup(
             KeyboardButton(text='Изменить расписание'),
         ],
 
-        # [
-        #     KeyboardButton(text='Сделать объявление')
-        # ]
+        [
+            KeyboardButton(text='Сделать объявление')
+        ]
     ],
     resize_keyboard=True,
+    input_field_placeholder="Выберите действие",
 )
 
 classes = ReplyKeyboardMarkup(
@@ -65,6 +68,7 @@ classes = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
+    input_field_placeholder="Выберите действие",
 )
 
 days = ReplyKeyboardMarkup(
@@ -89,6 +93,7 @@ days = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
+    input_field_placeholder="Выберите действие",
 )
 
 cancel = ReplyKeyboardMarkup(
@@ -98,4 +103,5 @@ cancel = ReplyKeyboardMarkup(
         ],
     ],
     resize_keyboard=True,
+    input_field_placeholder="Выберите действие",
 )

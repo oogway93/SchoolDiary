@@ -23,7 +23,7 @@ def on_startup() -> str:
 
 
 scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
-scheduler.add_job(handlers.send_notifications_each_day_handler, 'cron', day_of_week='mon-sun', hour=16, minute=10,
+scheduler.add_job(handlers.send_notifications_each_day_handler, 'cron', day_of_week='mon-sun', hour=18, minute=0,
                   kwargs={'bot': bot})
 
 scheduler.add_job(handlers.send_notifications_before_lesson, 'cron', day_of_week='mon,thu', hour='7-12',
@@ -32,9 +32,8 @@ scheduler.add_job(handlers.send_notifications_before_lesson, 'cron', day_of_week
 scheduler.add_job(handlers.send_notifications_before_lesson, 'cron', day_of_week='sat', hour='7-12',
                   minute='55,45,35,25,15,5',
                   kwargs={'bot': bot})
-
-scheduler.add_job(handlers.send_notifications_before_lesson, 'cron', day_of_week='tue,wed,fri', hour='7-12', minute=55,
-                  kwargs={'bot': bot})
+scheduler.add_job(handlers.send_notifications_before_lesson, 'cron', day_of_week='tue,wed,fri', hour='7-12',
+                  minute=55, kwargs={'bot': bot})
 
 
 async def main():

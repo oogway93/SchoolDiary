@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_TOKEN = os.environ.get('API_TOKEN')
-ADMIN_ID = os.environ.get('ADMIN_ID')
+ADMIN_ID1 = os.environ.get('ADMIN_ID1')
+ADMIN_ID2 = os.environ.get('ADMIN_ID2')
 MONGO_USER = os.environ.get('MONGO_USER')
 MONGO_PASS = os.environ.get('MONGO_PASS')
 

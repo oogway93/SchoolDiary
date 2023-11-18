@@ -28,6 +28,7 @@ class Form(StatesGroup):
 
 
 class Schedule(StatesGroup):
+    """ Расписание  """
     choosing_class = State()
     choosing_day = State()
 
@@ -41,7 +42,7 @@ async def start_handler(message: Message) -> Message:
     await message.answer(f'{hbold("Добро пожаловать в SchoolDiary")}\n\n'
                          'Этот бот позволяет получить расписание твоего класса на любой день недели.\n'
                          'Также ты можешь настроить уведомление, чтобы быть в курсе какие у тебя завтра уроки.\n\n'
-                         f'{hbold("Доступные команды:")} \n\nРасписание \nКонтакты \nАдмин-панель',
+                         f'{hbold("Доступные команды:")} \n\nРасписание \nКонтакты \nАдмин-панель \nУведомления',
                          reply_markup=kb.main
                          )
     user_id = message.from_user.id
@@ -53,7 +54,7 @@ async def start_handler(message: Message) -> Message:
     logging.info(msg='Выходные данные: ' + str(username))
 
 
-@router.message(F.text.lower() == 'уведомление')
+@router.message(F.text.lower() == 'уведомления')
 async def form_answer1(message: Message, state: FSMContext) -> typing.NoReturn:
     """
     Форма, спрашивающая "Получать расписание...".
@@ -93,15 +94,16 @@ async def form_data(message: Message, state: FSMContext, bot: Bot) -> typing.Cal
         await send_notifications_each_day_handler(bot)
     if user_data.get(1) == 'Да':
         await send_notifications_before_lesson(bot)
+    await message.answer("Сохранено.", reply_markup=kb.main)
     await state.clear()
 
 
 async def send_notifications_each_day_handler(bot: Bot) -> Message:
     """
-    Хэндлер, вызывающий задачу и передающий параметры.
+    Хэндлер, вызывающи й задачу и передающий параметры.
     :param bot: Bot
     """
-    message = "Привет. Твое расписание на завтра..."
+    message = "Привет! Твое расписание на завтра..."
     await tasks.send_notifications_task(bot, message)
 
 
@@ -116,14 +118,23 @@ async def send_notifications_before_lesson(bot: Bot) -> Message:
 
 @router.message(F.text.lower() == 'контакты')
 async def contacts_handler(message: Message):
+    """
+    Хэндлер контакты
+    :param message: Message
+    """
     await message.answer(
-        text='По всем вопросам и предложениям: \n\n@Ensp1r\n@kiddcoding',
+        text='По всем вопросам и предложениям:\n\n@Ensp1r\n@kiddcoding',
         reply_markup=kb.main
     )
 
 
 @router.message(F.text.lower() == 'расписание')
 async def schedule_handler(message: Message, state: FSMContext):
+    """
+    Хэндлер, реализующий расписание
+    :param message: Message
+    :param state: FSMContext
+    """
     await message.answer(
         text='Выберите свой класс:',
         reply_markup=kb.classes
@@ -134,6 +145,11 @@ async def schedule_handler(message: Message, state: FSMContext):
 
 @router.message(Schedule.choosing_class, F.text.lower().in_(available_classes))
 async def class_chosen_handler(message: Message, state: FSMContext):
+    """
+    Хэндлер, реализуюший выбор класса
+    :param message: Message
+    :param state: FSMContext
+    """
     await state.update_data(chosen_class=message.text.upper())
     await message.answer(
         text='Выберите день недели:',
@@ -145,6 +161,10 @@ async def class_chosen_handler(message: Message, state: FSMContext):
 
 @router.message(Schedule.choosing_class)
 async def class_chosen_incorrectly_handler(message: Message):
+    """
+    Хэндлер, реализующий выбор класса при неправильном вводе
+    :param message: Message
+    """
     await message.answer(
         text='Извините, но такого класса не существует в нашей школе.',
         reply_markup=kb.classes
@@ -153,6 +173,11 @@ async def class_chosen_incorrectly_handler(message: Message):
 
 @router.message(Schedule.choosing_day, F.text.lower().in_(available_days))
 async def day_chosen_handler(message: Message, state: FSMContext):
+    """
+    Хэндлер, реализующий выбор дня недели
+    :param message: Message
+    :param state: FSMContext
+    """
     user_data = await state.get_data()
     chosen_class = user_data['chosen_class']
     chosen_day = message.text.lower()
@@ -167,7 +192,7 @@ async def day_chosen_handler(message: Message, state: FSMContext):
     for subject in get_schedule:
         counter += 1
         result += str(counter) + ') '
-        result += subject + '\n'
+        result += subject.title() + '\n'
 
     await message.answer(
         text=f'Ваше на расписание на {message.text}: \n\n{result}',
@@ -180,6 +205,11 @@ async def day_chosen_handler(message: Message, state: FSMContext):
 @router.message(Command(commands=["cancel"]))
 @router.message(F.text.lower() == "отмена")
 async def cancel_handler(message: Message, state: FSMContext):
+    """
+    Хэндлер, реализующий отмену действий.
+    :param message: Message
+    :param state: FSMContext
+    """
     await state.clear()
     await message.answer(
         text="Действие отменено",
@@ -189,6 +219,10 @@ async def cancel_handler(message: Message, state: FSMContext):
 
 @router.message(Schedule.choosing_day)
 async def day_chosen_incorrectly_handler(message: Message):
+    """
+    Хэндлер, реализующий выбор дня недели при неправильном вводе.
+    :param message: Message
+    """
     await message.answer(
         text='Извините, но в данный день не проводятся уроки.',
         reply_markup=kb.days

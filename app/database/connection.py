@@ -2,6 +2,9 @@ import aiosqlite
 
 
 async def create_db_sqlite() -> None:
+    """
+    Создание базы данных sqlite3
+    """
     async with aiosqlite.connect('schoolDiary.db') as db:
         await db.execute(
             """

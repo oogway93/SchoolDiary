@@ -12,7 +12,10 @@ async def create_db_sqlite() -> None:
             (
                 id       INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id  INTEGER UNIQUE NOT NULL,
-                username TEXT UNIQUE    NOT NULL
+                username TEXT UNIQUE    NOT NULL,
+                class    TEXT,
+                is_active INTEGER NOT NULL DEFAULT 0,
+                is_active2 INTEGER NOT NULL DEFAULT 0
             );
             """
         )

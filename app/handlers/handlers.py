@@ -1,6 +1,8 @@
 import logging
 import typing
+from datetime import datetime
 
+import aiosqlite
 from aiogram import F, Router, Bot
 from aiogram.types import Message
 from aiogram.utils.markdown import hbold
@@ -14,7 +16,6 @@ from app.database import utils
 
 router = Router()
 
-
 answers1 = ["Да", "Нет"]
 answers2 = ["Да", "Нет"]
 
@@ -26,6 +27,7 @@ class Form(StatesGroup):
     """ Форма ответов на вопросы """
     answers1 = State()
     answers2 = State()
+    choosing_class = State()
 
 
 class Schedule(StatesGroup):
@@ -48,7 +50,7 @@ async def start_handler(message: Message) -> Message:
                          )
     user_id = message.from_user.id
     username = message.from_user.username
-    await utils.insert_user_sql(user_id, username)
+    await insert_user_sql(user_id, username)
 
     # для разработчика
     logging.info(msg='Выходные данные: ' + str(user_id))
@@ -62,7 +64,7 @@ async def form_answer1(message: Message, state: FSMContext) -> typing.NoReturn:
     :param state: FSMContext
     :param message: Message
     """
-    await message.answer(text='Вы хотите получать расписания на каждый учебный день недели в 18:00?',
+    await message.answer(text='Вы хотите получать расписания следующего учебного дня в 18:00?',
                          reply_markup=kb.tf_btns)
     await state.set_state(Form.answers1)
     logging.info(msg='Выходные данные: ' + message.text)
@@ -76,12 +78,27 @@ async def form_answer2(message: Message, state: FSMContext) -> typing.NoReturn:
     :param state: FSMContext
     """
     await state.update_data(chosen_answer1=message.text)
-    await message.answer(text="Вы хотите получать уведомления за 5 минут до начала урока?", reply_markup=kb.tf_btns)
+    await message.answer(text="Вы хотите получать расписания на текущий учебный день в 7:00?", reply_markup=kb.tf_btns)
     await state.set_state(Form.answers2)
     logging.info(msg='Выходные данные: ' + message.text)  # для разработчика
 
 
 @router.message(Form.answers2, F.text.in_(answers2))
+async def form_choosing_classes(message: Message, state: FSMContext):
+    """
+    Хэндлер, реализуюший выбор класса
+    :param message: Message
+    :param state: FSMContext
+    """
+    await state.update_data(chosen_answer2=message.text)
+    await message.answer(
+        text='Выберите свой класс для отправки расписания:',
+        reply_markup=kb.classes
+    )
+    await state.set_state(Form.choosing_class)
+
+
+@router.message(Form.choosing_class, F.text.lower().in_(available_classes))
 async def form_data(message: Message, state: FSMContext, bot: Bot) -> typing.Callable:
     """
     Результаты опроса.
@@ -89,32 +106,81 @@ async def form_data(message: Message, state: FSMContext, bot: Bot) -> typing.Cal
     :param state: FSMContext
     :param bot: Bot
     """
-    await state.update_data(chosen_answer2=message.text)
+    user_id = message.from_user.id
+    await state.update_data(chosen_class=message.text)
     user_data = await state.get_data()
-    if user_data.get(0) == 'Да':
-        await send_notifications_each_day_handler(bot)
-    if user_data.get(1) == 'Да':
-        await send_notifications_before_lesson(bot)
+    if user_data['chosen_answer1'] == 'Да':
+        await utils.insert_class_and_isActive_sql(user_id, user_data['chosen_class'], 1)
+        # await send_notifications_each_day_18_handler(bot)
+    elif user_data['chosen_answer1'] == 'Нет':
+        await utils.insert_class_and_isActive_sql(user_id, user_data['chosen_class'], 0)
+
+    if user_data['chosen_answer2'] == 'Да':
+        await utils.insert_isActive2_sql(user_id, 1)
+        # await send_notifications_each_day_7_handler(bot)
+    elif user_data['chosen_answer2'] == 'Нет':
+        await utils.insert_isActive2_sql(user_id, 0)
+
     await message.answer("Сохранено.", reply_markup=kb.main)
     await state.clear()
 
 
-async def send_notifications_each_day_handler(bot: Bot) -> Message:
-    """
-    Хэндлер, вызывающи й задачу и передающий параметры.
-    :param bot: Bot
-    """
-    message = "Привет! Твое расписание на завтра..."
-    await tasks.send_notifications_task(bot, message)
-
-
-async def send_notifications_before_lesson(bot: Bot) -> Message:
+async def send_notifications_each_day_18_handler(bot: Bot) -> Message:
     """
     Хэндлер, вызывающий задачу и передающий параметры.
+    :param chosen_class:
     :param bot: Bot
     """
-    message = "Через 5 минут урок!!! Скорей на занятия"
-    await tasks.send_notifications_task(bot, message)
+    async with aiosqlite.connect('schoolDiary.db') as db:
+        async with db.execute("""SELECT user_id, class FROM users WHERE is_active=?;""", (1,)) as cursor:
+            async for query in cursor:
+                user_id, class_name = query
+                weekdays = {1: 'понедельник', 2: 'вторник', 3: 'среда', 4: 'четверг', 5: 'пятница', 6: 'суббота'}
+                data = utils.collection.find_one({"class_name": class_name})
+
+                day = datetime.now().isoweekday()
+                day_now = ''
+                if day <= 5:
+                    day_now = weekdays.get(day + 1, 'Error')
+                if day == 7:
+                    day_now = weekdays.get(1)
+                get_schedule = data['schedule'][day_now]
+                counter = 0
+                message = ''
+
+                for subject in get_schedule:
+                    counter += 1
+                    message += str(counter) + ') '
+                    message += subject.capitalize() + '\n'
+                await tasks.send_notifications_18_task(bot, message, user_id)
+
+
+async def send_notifications_each_day_7_handler(bot: Bot) -> Message:
+    """
+    Хэндлер, вызывающий задачу и передающий параметры.
+    :param chosen_class:
+    :param bot: Bot
+    """
+    async with aiosqlite.connect('schoolDiary.db') as db:
+        async with db.execute("""SELECT user_id, class FROM users WHERE is_active2=?;""", (1,)) as cursor:
+            async for query in cursor:
+                user_id, class_name = query
+                weekdays = {1: 'понедельник', 2: 'вторник', 3: 'среда', 4: 'четверг', 5: 'пятница', 6: 'суббота'}
+                data = utils.collection.find_one({"class_name": class_name})
+
+                day = datetime.now().isoweekday()
+                day_now = ''
+                if day <= 6:
+                    day_now = weekdays.get(day)
+                get_schedule = data['schedule'][day_now]
+                counter = 0
+                message = ''
+
+                for subject in get_schedule:
+                    counter += 1
+                    message += str(counter) + ') '
+                    message += subject.capitalize() + '\n'
+                await tasks.send_notifications_7_task(bot, message, user_id)
 
 
 @router.message(F.text.lower() == 'контакты')

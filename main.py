@@ -23,10 +23,10 @@ def on_startup() -> str:
 
 
 scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
-scheduler.add_job(handlers.send_notifications_each_day_18_handler, 'cron', day_of_week='mon-sun', hour=21, minute=42,
+scheduler.add_job(handlers.send_notifications_each_day_18_handler, 'cron', day_of_week='mon-sun', hour=18, minute=0,
                   kwargs={'bot': bot})
 
-scheduler.add_job(handlers.send_notifications_each_day_7_handler, 'cron', day_of_week='mon-sun', hour=21, minute=43,
+scheduler.add_job(handlers.send_notifications_each_day_7_handler, 'cron', day_of_week='mon-sun', hour=7, minute=0,
                   kwargs={'bot': bot})
 
 

@@ -50,7 +50,7 @@ async def start_handler(message: Message) -> Message:
                          )
     user_id = message.from_user.id
     username = message.from_user.username
-    await insert_user_sql(user_id, username)
+    await utils.insert_user_sql(user_id, username)
 
     # для разработчика
     logging.info(msg='Выходные данные: ' + str(user_id))
@@ -99,25 +99,22 @@ async def form_choosing_classes(message: Message, state: FSMContext):
 
 
 @router.message(Form.choosing_class, F.text.lower().in_(available_classes))
-async def form_data(message: Message, state: FSMContext, bot: Bot) -> typing.Callable:
+async def form_data(message: Message, state: FSMContext) -> typing.Callable:
     """
     Результаты опроса.
     :param message: Message
     :param state: FSMContext
-    :param bot: Bot
     """
     user_id = message.from_user.id
     await state.update_data(chosen_class=message.text)
     user_data = await state.get_data()
     if user_data['chosen_answer1'] == 'Да':
         await utils.insert_class_and_isActive_sql(user_id, user_data['chosen_class'], 1)
-        # await send_notifications_each_day_18_handler(bot)
     elif user_data['chosen_answer1'] == 'Нет':
         await utils.insert_class_and_isActive_sql(user_id, user_data['chosen_class'], 0)
 
     if user_data['chosen_answer2'] == 'Да':
         await utils.insert_isActive2_sql(user_id, 1)
-        # await send_notifications_each_day_7_handler(bot)
     elif user_data['chosen_answer2'] == 'Нет':
         await utils.insert_isActive2_sql(user_id, 0)
 
@@ -127,8 +124,7 @@ async def form_data(message: Message, state: FSMContext, bot: Bot) -> typing.Cal
 
 async def send_notifications_each_day_18_handler(bot: Bot) -> Message:
     """
-    Хэндлер, вызывающий задачу и передающий параметры.
-    :param chosen_class:
+    Хэндлер, вызывающий задачу и передающий параметры в 18:00.
     :param bot: Bot
     """
     async with aiosqlite.connect('schoolDiary.db') as db:
@@ -157,8 +153,7 @@ async def send_notifications_each_day_18_handler(bot: Bot) -> Message:
 
 async def send_notifications_each_day_7_handler(bot: Bot) -> Message:
     """
-    Хэндлер, вызывающий задачу и передающий параметры.
-    :param chosen_class:
+    Хэндлер, вызывающий задачу и передающий параметры в 7:00.
     :param bot: Bot
     """
     async with aiosqlite.connect('schoolDiary.db') as db:

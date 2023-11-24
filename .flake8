@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 120
+extend-ignore = E203, W503, W605, D107,
+exclude = venv/, __init__.py, ./tests/*, .mypy_cache, .pytest_cache, env.py, ./migrations/versions/*, ./src/settings/settings.py

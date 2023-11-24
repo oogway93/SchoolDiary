@@ -1,8 +1,6 @@
-import aiosqlite
 from aiogram import Bot
 from aiogram.types import Message
 from aiogram.exceptions import TelegramForbiddenError
-from app.keyboards import reply as kb
 
 
 async def send_notifications_18_task(bot: Bot, message: str, user_id) -> Message:

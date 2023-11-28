@@ -65,7 +65,7 @@ async def admin_message_handler(message: Message, state: FSMContext):
 
 @router.message(AnnouncementFromAdmin.admin_announcing, F.text)
 async def admin_announced_handler(message: Message, state: FSMContext, bot: Bot):
-    await tasks.send_notifications_18_task(bot, message.text, )
+    await tasks.send_message_admin(bot, message.text)
     await message.answer(
         text='Сообщение успешно отправлено всем пользователям.',
         reply_markup=kb.main
